@@ -59,8 +59,9 @@ class DelayQueue
 
         $response = $this->getHttpClient()->post('/push', [
             'json' => $job,
+            'allow_redirects' => false,
         ]);
-        $this->checkResponseBody($response->json());
+        $this->checkResponseBody($this->getResponseData($response));
     }
 
     /**
@@ -79,10 +80,11 @@ class DelayQueue
         $response = $this->getHttpClient()->post('/pop', [
             'json' => [
                 'topic' => implode(',', $topics),
-            ]
+            ],
+            'allow_redirects' => false,
         ]);
 
-        $data =  $response->json();
+        $data =  $this->getResponseData($response);
         $this->checkResponseBody($data);
         if (!isset($data['data']) || empty($data['data'])) {
             return null;
@@ -118,10 +120,10 @@ class DelayQueue
         $response = $this->getHttpClient()->post('/delete', [
             'json' => [
                'id' => $id
-            ]
+            ],
+            'allow_redirects' => false,
         ]);
-        $body =  $response->json();
-        $this->checkResponseBody($body);
+        $this->checkResponseBody($this->getResponseData($response));
     }
 
     /**
@@ -137,9 +139,10 @@ class DelayQueue
         $response = $this->getHttpClient()->post('/finish', [
             'json' => [
                 'id' => $id,
-            ]
+            ],
+            'allow_redirects' => false,
         ]);
-        $body = $response->json();
+        $body = $this->getResponseData($response);
         $this->checkResponseBody($body);
     }
 
@@ -158,11 +161,8 @@ class DelayQueue
     {
         $httpClient = new HttpClient(
             [
-                'base_url' => $this->server,
-                'defaults' => [
-                    'timeout' => $this->timeout,
-                    'allow_redirects' => false,
-                ]
+                'base_uri' => $this->server,
+                'timeout' => $this->timeout,
             ]
         );
 
@@ -182,5 +182,10 @@ class DelayQueue
         if ($body['code'] !== 0) {
             throw new Exception($body['message']);
         }
+    }
+
+    private function getResponseData(\Psr\Http\Message\ResponseInterface $response)
+    {
+        return json_decode($response->getBody()->getContents(), true);
     }
 }
