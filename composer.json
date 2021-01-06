@@ -1,5 +1,5 @@
 {
-  "name": "start-point/delayqueue-php",
+  "name": "alan/delayqueue-php",
   "type": "library",
   "description": "PHP client for DelayQueue",
   "keywords": ["delayqueue","delayqueue-php"],
